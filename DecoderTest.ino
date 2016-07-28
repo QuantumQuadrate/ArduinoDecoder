@@ -14,6 +14,7 @@
 // Connect Channel A on encoder to CHA_X on HTCL
 // Connect Channel B on encoder to CHB_X on HTCL
 // NOTE: Index Channel not yet supported
+// TEST TEXT
 // --------------------------------------------
 // Known Bugs:
 // - Count goes up with every other turn of encoder rather than every turn
