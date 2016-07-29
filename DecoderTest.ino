@@ -18,6 +18,7 @@
 // --------------------------------------------
 // Known Bugs:
 // - Count goes up with every other turn of encoder rather than every turn
+//  - Possible Cause: Set to 2x mode instead of 4x?
 
 void setup() {
   Serial.begin(9600);
