@@ -13,11 +13,16 @@
 // Connect GND Arduino pin to GND on optical encoder and V_SS on HTCL
 // Connect Channel A on encoder to CHA_X on HTCL
 // Connect Channel B on encoder to CHB_X on HTCL
-// NOTE: Index Channel not yet supported
+// NOTE: Index Channel not yet supported in code
 // TEST TEXT
 // --------------------------------------------
 // Known Bugs:
 // Clear
+// --------------------------------------------
+// Known Limitations:
+// If encoder is turned too rapidly, will not record (Hardware limits?)
+// Only 8-bit count currently, eventually can support 32-bit
+// Cannot read out negative numbers
 
 void setup() {
   Serial.begin(9600);
