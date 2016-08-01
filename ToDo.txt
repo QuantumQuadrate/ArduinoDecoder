@@ -1,0 +1,8 @@
+Decoder Development To-Do List
+
+1) Full 32-bit output
+2) Easier setup?
+3) Negative counts?
+4) Overflow/reset?
+5) Library?
+6) Index channel support?
