@@ -3,7 +3,7 @@
 // SETUP:
 // Connect Arduino MEGA digital pins 22-29 to D0-D7 on the HTCL
 // Connect digital pin 31 to X/Y
-// Connect digital pins 32 and 33 to EN1, EN2
+// Connect digital pins 33 and 32 to EN1, EN2 respectively
 // Connect digital pin 34 to SEL2
 // Connect digital pin 36 to SEL1
 // Connect digital pin 35 to RSTX
@@ -17,18 +17,17 @@
 // TEST TEXT
 // --------------------------------------------
 // Known Bugs:
-// - Count goes up with every other turn of encoder rather than every turn
-//  - Possible Cause: Set to 2x mode instead of 4x?
+// Clear
 
 void setup() {
   Serial.begin(9600);
   // 4x mode
   // EN1 = 1
   pinMode(33,OUTPUT);
-  digitalWrite(33, HIGH);
+  digitalWrite(33, LOW);
   // EN2 = 0
   pinMode(32, OUTPUT);
-  digitalWrite(32,LOW);
+  digitalWrite(32,HIGH);
   // X-axis
   pinMode(31, OUTPUT);
   digitalWrite(31, LOW);
@@ -59,6 +58,7 @@ void setup() {
 }
 
 int Result;
+int Result_old;
 
 void loop() {
   // Clock High
@@ -67,9 +67,12 @@ void loop() {
   delay(10);
   // Read
   Result = PINA;
-  Serial.println(Result);
+  if (Result != Result_old) {
+    Serial.println(Result);
+  }
   // Clock Low
   digitalWrite(13, LOW);
+  Result_old = Result;
   // Wait
   delay(10);
 
