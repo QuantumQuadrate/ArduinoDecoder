@@ -1,4 +1,4 @@
-// Decoder TEST v0.1 -- Andrew Micklich -- July 2016
+// Decoder TEST v0.2 -- Andrew Micklich -- August 2016
 // ------------------------------------------
 // SETUP:
 // Connect Arduino MEGA digital pins 22-29 to D0-D7 on the HTCL
@@ -17,12 +17,11 @@
 // TEST TEXT
 // --------------------------------------------
 // Known Bugs:
-// Clear
+// Can now read negative numbers, unsure of why.
 // --------------------------------------------
 // Known Limitations:
-// If encoder is turned too rapidly, will not record (Hardware limits?)
-// Only 8-bit count currently, eventually can support 32-bit
-// Cannot read out negative numbers
+// If encoder is turned too rapidly, will not record (Hardware limits? Clock limits?)
+// Only 16-bit count currently, eventually can support 32-bit if necessary
 
 void setup() {
   Serial.begin(9600);
