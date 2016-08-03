@@ -42,9 +42,6 @@ void setup() {
   // SEL Pins
   pinMode(36, OUTPUT);
   pinMode(34, OUTPUT);
-  // Reading LSB
-  digitalWrite(36, HIGH);
-  digitalWrite(34, LOW);
   // Set RSTX Low
   pinMode(35, OUTPUT);
   digitalWrite(35, HIGH);
@@ -64,14 +61,24 @@ void setup() {
 
 int Result;
 int Result_old;
+int Result_lo;
+int Result_3rd;
 
 void loop() {
   // Clock High
   digitalWrite(13, HIGH);
   // Wait
   delay(10);
-  // Read
-  Result = PINA;
+  // Reading LSB
+  digitalWrite(36, HIGH);
+  digitalWrite(34, LOW);
+  // LSB Input
+  Result_lo = PINA;
+  // Reading 3rd Byte
+  digitalWrite (36, LOW);
+  // 3rd Byte Input
+  Result_3rd = PINA;
+  Result = Result_lo + (256*Result_3rd);
   if (Result != Result_old) {
     Serial.println(Result);
   }
