@@ -17,7 +17,7 @@
 // TEST TEXT
 // --------------------------------------------
 // Known Bugs:
-// Can now read negative numbers, unsure of why.
+// None
 // --------------------------------------------
 // Known Limitations:
 // If encoder is turned too rapidly, will not record (Hardware limits? Clock limits?)
@@ -58,8 +58,8 @@ void setup() {
 
 }
 
-int Result;
-int Result_old;
+int16_t Result;
+int16_t Result_old;
 int Result_lo;
 int Result_3rd;
 
@@ -74,7 +74,7 @@ void loop() {
   // LSB Input
   Result_lo = PINA;
   // Reading 3rd Byte
-  digitalWrite (36, LOW);
+   digitalWrite (36, LOW);
   // 3rd Byte Input
   Result_3rd = PINA;
   Result = Result_lo + (256*Result_3rd);
