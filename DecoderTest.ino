@@ -7,6 +7,7 @@
 // Connect digital pin 34 to SEL2
 // Connect digital pin 36 to SEL1
 // Connect digital pin 35 to RSTX
+// Connect digital pin 30 to RSTY
 // Connect digital pin 36 to OE
 // Connect digital pin 13 to CLK
 // Connect 5V Arduino pin to 5V input on optical encoder and V_DD on HTCL
@@ -41,7 +42,7 @@ void setup() {
   // SEL Pins
   pinMode(36, OUTPUT);
   pinMode(34, OUTPUT);
-  // Set RSTX Low
+  // Set RSTX High
   pinMode(35, OUTPUT);
   digitalWrite(35, HIGH);
   // Initialize Input Pins
