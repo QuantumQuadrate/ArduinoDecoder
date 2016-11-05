@@ -1,4 +1,4 @@
-// Decoder TEST v0.2 -- Andrew Micklich -- August 2016
+// Decoder TEST v0.21 -- Andrew Micklich -- September 2016
 // ------------------------------------------
 // SETUP:
 // Connect Arduino MEGA digital pins 22-29 to D0-D7 on the HTCL
@@ -9,7 +9,7 @@
 // Connect digital pin 35 to RSTX
 // Connect digital pin 30 to RSTY
 // Connect digital pin 36 to OE
-// Connect digital pin 13 to CLK
+// Connect digital pin 38 to CLK
 // Connect 5V Arduino pin to 5V input on optical encoder and V_DD on HTCL
 // Connect GND Arduino pin to GND on optical encoder and V_SS on HTCL
 // Connect Channel A on encoder to CHA_X on HTCL
@@ -29,10 +29,10 @@ void setup() {
   // 4x mode
   // EN1 = 1
   pinMode(33,OUTPUT);
-  digitalWrite(33, LOW);
+  digitalWrite(33, HIGH);
   // EN2 = 0
   pinMode(32, OUTPUT);
-  digitalWrite(32,HIGH);
+  digitalWrite(32,LOW);
   // X-axis
   pinMode(31, OUTPUT);
   digitalWrite(31, LOW);
@@ -55,7 +55,7 @@ void setup() {
   pinMode(28, INPUT);
   pinMode(29, INPUT);
   // LED + CLK (LED labeled "L" should be on)
-  pinMode(13, OUTPUT);
+  pinMode(38, OUTPUT);
 
 }
 
@@ -66,7 +66,7 @@ int Result_3rd;
 
 void loop() {
   // Clock High
-  digitalWrite(13, HIGH);
+  digitalWrite(38, HIGH);
   // Wait
   delay(10);
   // Reading LSB
@@ -83,7 +83,7 @@ void loop() {
     Serial.println(Result);
   }
   // Clock Low
-  digitalWrite(13, LOW);
+  digitalWrite(38, LOW);
   Result_old = Result;
   // Wait
   delay(10);
