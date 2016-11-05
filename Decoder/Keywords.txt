@@ -1,0 +1,10 @@
+Decoder	KEYWORD1
+setCount4	KEYWORD2
+setCount2	KEYWORD2
+setCount1	KEYWORD2
+readLSB	KEYWORD2
+read3SB	KEYWORD2
+start	KEYWORD2
+setPoint	KEYWORD2
+getAbsPos	KEYWORD2
+getRelPos	KEYWORD2
