@@ -1,9 +1,0 @@
-Decoder Development To-Do List
-
-1) Full 32-bit output (Up to 16-bit, best to leave it there unless necessary for speed)
-2) Easier setup?
-3) Negative counts? (This now works and I have no idea why)
-4) Overflow/reset? (Unnecessary unless we need better than 32-bit)
-5) Library?
-6) Index channel support? (Unsure what this adds)
-7) Stability checks (Necessary if we increase clock speed?)
