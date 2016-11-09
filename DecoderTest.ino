@@ -23,40 +23,14 @@
 // Known Limitations:
 // If encoder is turned too rapidly, will not record (Hardware limits? Clock limits?)
 // Only 16-bit count currently, eventually can support 32-bit if necessary
+#include <Decoder.h>
+
+Decoder decoder;
 
 void setup() {
-  Serial.begin(9600);
-  // 4x mode
-  // EN1 = 1
-  pinMode(33,OUTPUT);
-  digitalWrite(33, HIGH);
-  // EN2 = 0
-  pinMode(32, OUTPUT);
-  digitalWrite(32,LOW);
-  // X-axis
-  pinMode(31, OUTPUT);
-  digitalWrite(31, LOW);
-  // OE Low
-  pinMode(37, OUTPUT);
-  digitalWrite(37, LOW);
-  // SEL Pins
-  pinMode(36, OUTPUT);
-  pinMode(34, OUTPUT);
-  // Set RSTX High
-  pinMode(35, OUTPUT);
-  digitalWrite(35, HIGH);
-  // Initialize Input Pins
-  pinMode(22, INPUT);
-  pinMode(23, INPUT);
-  pinMode(24, INPUT);
-  pinMode(25, INPUT);
-  pinMode(26, INPUT);
-  pinMode(27, INPUT);
-  pinMode(28, INPUT);
-  pinMode(29, INPUT);
-  // LED + CLK (LED labeled "L" should be on)
-  pinMode(38, OUTPUT);
-
+  // put your setup code here, to run once:
+  decoder.start();
+  Serial.println("Start");
 }
 
 int16_t Result;
@@ -65,27 +39,14 @@ int Result_lo;
 int Result_3rd;
 
 void loop() {
-  // Clock High
   digitalWrite(38, HIGH);
-  // Wait
-  delay(10);
-  // Reading LSB
-  digitalWrite(36, HIGH);
-  digitalWrite(34, LOW);
-  // LSB Input
-  Result_lo = PINA;
-  // Reading 3rd Byte
-   digitalWrite (36, LOW);
-  // 3rd Byte Input
-  Result_3rd = PINA;
+  Result_lo = decoder.readLSB(0);
+  Result_3rd = decoder.read3SB(0);
   Result = Result_lo + (256*Result_3rd);
   if (Result != Result_old) {
     Serial.println(Result);
   }
-  // Clock Low
-  digitalWrite(38, LOW);
+  digitalWrite(38,LOW);
   Result_old = Result;
-  // Wait
-  delay(10);
 
 }
