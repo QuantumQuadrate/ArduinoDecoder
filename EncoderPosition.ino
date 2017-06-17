@@ -25,7 +25,7 @@
 // Only 16-bit count currently, eventually can support 32-bit if necessary
 // Other Useful Info:
 // Toggling between the X and Y channels is explained in the Decoder.h file as follows:
-// ReadLSB and READ3SB take boolean arguements, 0 for x axis, and 1 for y axis 
+// ReadLSB and READ3SB take boolean arguements, 0 for x axis, and 1 for y axis
 #include <Decoder.h>
 #include <EEPROM.h>
 
@@ -64,10 +64,10 @@ void StatusReply(){
 }
 
 void ReadReply(){
-  
+
     motorAxis = Serial.read();
     while(motorAxis == -1){
-      motorAxis = Serial.read(); 
+      motorAxis = Serial.read();
     }
     digitalWrite(38, HIGH);
     Result_lo = decoder.readLSB(int(motorAxis));
@@ -79,4 +79,3 @@ void ReadReply(){
     Result_old = Result;
 
 }
-
