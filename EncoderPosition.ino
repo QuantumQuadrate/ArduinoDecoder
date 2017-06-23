@@ -1,4 +1,4 @@
-// Decoder TEST v0.21 -- Andrew Micklich -- September 2016
+// Arduino Serial Communication -- Syd Lybert, Andrew Micklich -- June 2017
 // ------------------------------------------
 // SETUP:
 // Connect Arduino MEGA digital pins 22-29 to D0-D7 on the HTCL
@@ -38,8 +38,10 @@ void setup() {
   Serial.println("Start");
 }
 
-short int Result;
-short int Result_old;
+short int ResultX;
+short int ResultY;
+short int Result_oldY;
+short int Result_oldX;
 int Result_lo;
 int Result_3rd;
 char inByte;
@@ -56,8 +58,36 @@ void loop() {
           StatusReply();
     }
   }
+  DecoderWrite();
+  EepromWrite();
 }
 
+
+void DecoderWrite(){
+  Result_lo = decoder.readLSB(1);
+  Result_3rd = decoder.read3SB(1);
+  ResultY = Result_lo + (256*Result_3rd);
+  
+  Result_lo = decoder.readLSB(0);
+  Result_3rd = decoder.read3SB(0);
+  ResultX = Result_lo + (256*Result_3rd);
+  
+}
+
+void EepromWrite(){
+
+  if(Result_oldY != ResultY){
+    //Y value is stored at eeprom(1)
+    EEPROM.write(1, ResultY);
+    Result_oldY = ResultY;
+  }
+  if(Result_oldX != ResultX){
+    //X value is stored at eeprom(2)
+    EEPROM.write(2, ResultX);
+    Result_oldX = ResultX;
+  }
+
+}
 
 void StatusReply(){
     Serial.println(EEPROM.read(0));
@@ -69,13 +99,11 @@ void ReadReply(){
     while(motorAxis == -1){
       motorAxis = Serial.read();
     }
-    digitalWrite(38, HIGH);
-    Result_lo = decoder.readLSB(int(motorAxis));
-    Result_3rd = decoder.read3SB(int(motorAxis));
-    Result = Result_lo + (256*Result_3rd);
-
-    Serial.println(Result, HEX);
-    digitalWrite(38,LOW);
-    Result_old = Result;
+  if(int(motorAxis) == 1){
+    Serial.println(ResultY, HEX);
+  }
+  if(int(motorAxis) == 0){
+    Serial.println(ResultX, HEX);
+  }
 
 }
