@@ -31,21 +31,38 @@
 
 Decoder decoder;
 
-void setup() {
-  // put your setup code here, to run once:
-  Serial.begin(115200);
-  decoder.start();
-  Serial.println("Start");
-}
-
-short int ResultX;
-short int ResultY;
-short int Result_oldY;
-short int Result_oldX;
+//TODO: Clean up global variables, probably don't need this many
+int ResultX;
+int ResultY;
+int Result_oldY;
+int Result_oldX;
 int Result_lo;
 int Result_3rd;
+int offsetX = 0;
+int offsetY= 0;
 char inByte;
 char motorAxis;
+
+unsigned long timerX = millis();
+unsigned long timerY = millis();
+
+//setup code
+void setup() {
+  Serial.begin(115200);
+  decoder.start();
+  
+  //if the eeprom is already storing postions
+  //this will store them  into the global variables
+  if(EEPROM.read(1) == 100){
+    offsetY = EEPROMRead16(2);
+    offsetX = EEPROMRead16(4);
+    ResultX = offsetX;
+    ResultY = offsetY;
+    Result_oldX = ResultX;
+    Result_oldY = ResultY;
+  }
+  Serial.println("Start");
+}
 
 void loop() {
   //Need to read the serial port until we get values dictating what happens next
@@ -57,44 +74,53 @@ void loop() {
     if(int(inByte) == 3){
           StatusReply();
     }
+    if(int(inByte) == 4){
+      ResetEEPROM();  
+    }
   }
   DecoderWrite();
   EepromWrite();
 }
 
-
+//Saves the current position of the encoders to global variables
 void DecoderWrite(){
   Result_lo = decoder.readLSB(1);
   Result_3rd = decoder.read3SB(1);
-  ResultY = Result_lo + (256*Result_3rd);
+  ResultY = Result_lo + (256*Result_3rd) + offsetY;
   
   Result_lo = decoder.readLSB(0);
   Result_3rd = decoder.read3SB(0);
-  ResultX = Result_lo + (256*Result_3rd);
+  ResultX = Result_lo + (256*Result_3rd) + offsetX;
   
 }
 
+//writes a position value to the eeprom
 void EepromWrite(){
-
-  if(Result_oldY != ResultY){
-    //Y value is stored at eeprom(1)
-    EEPROM.write(1, ResultY);
-    Result_oldY = ResultY;
+  if((millis()-timerY) >= 10000UL){
+    if(Result_oldY != ResultY){
+      EEPROMWrite16(2, ResultY);
+      Result_oldY = ResultY;
+      EEPROMCheck();
+    }
+    timerY = millis();
   }
-  if(Result_oldX != ResultX){
-    //X value is stored at eeprom(2)
-    EEPROM.write(2, ResultX);
-    Result_oldX = ResultX;
+  if((millis()-timerX) >= 10000UL){  
+    if(Result_oldX != ResultX){
+      EEPROMWrite16(4, ResultX);
+      Result_oldX = ResultX;
+      EEPROMCheck();
+    }
+    timerX = millis();
   }
-
 }
 
+//writes the arduino's serial number to serial
 void StatusReply(){
     Serial.println(EEPROM.read(0));
 }
 
+//writes the encoder position to serial
 void ReadReply(){
-
     motorAxis = Serial.read();
     while(motorAxis == -1){
       motorAxis = Serial.read();
@@ -106,4 +132,42 @@ void ReadReply(){
     Serial.println(ResultX, HEX);
   }
 
+}
+
+//Functions that writes sixteen bit integers to the eeprom
+void EEPROMWrite16(int address, int value){
+  //Decomposition from a int to bytes by using bitshift.
+  //One = Most significant, Two = Least significant byte
+  byte two = (value & 0xFF);
+  byte one = ((value >> 8) & 0xFF);
+
+  //Write the 2 bytes into the eeprom memory.
+  EEPROM.write(address, two);
+  EEPROM.write(address + 1, one);
+}
+
+//Reads in 16 bit integers from the eeprom
+int EEPROMRead16(int address){
+  //Read the 2 bytes from the eeprom memory.
+  int two = EEPROM.read(address);
+  int one = EEPROM.read(address + 1);
+  
+  //Return the recomposed int by using bitshift.
+  return ((two << 0) & 0xFF) + ((one << 8) & 0xFFFF);
+}
+
+//Function to check if the Arduino is storing old positions
+void EEPROMCheck(){
+  if(EEPROM.read(1) == 255){
+      EEPROM.write(1, 100);
+  }
+}
+
+//Function to tell the arduino to forget previous positions
+//This writes to serial and returns the reset condition
+void ResetEEPROM(){
+  EEPROM.write(1, 255);
+  EEPROMWrite16(2, 0);
+  EEPROMWrite16(4, 0);
+  Serial.println(EEPROM.read(1));
 }
