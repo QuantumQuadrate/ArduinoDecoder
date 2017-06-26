@@ -12,8 +12,8 @@ Written by: Sydney Lybert and Andrew Micklich
 
 EncoderPosition.ino - This is an Arduino program that works with the Decoder library.
 Its purpose is serial communication between the pypico server and the Arduino managing the quadrature decoder.
-The pypico server is found here: https://github.com/QuantumQuadrate/pypico
-The serial communication class is found here: https://github.com/QuantumQuadrate/pypico/tree/master/pypico/arduinoComm
+The pypico server is found here: https://github.com/QuantumQuadrate/pypico.
+The serial communication class is found here: https://github.com/QuantumQuadrate/pypico/tree/master/pypico/arduinoComm.
 
 ## Use
 
