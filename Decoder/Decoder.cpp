@@ -21,79 +21,78 @@ Decoder::Decoder() {
 
 void Decoder::start() {
 	// Default to 4x count
-	Serial.begin(115200);
-	pinMode(33,OUTPUT);
-	digitalWrite(33,HIGH);
-	pinMode(32, OUTPUT);
-	digitalWrite(32,LOW);
+	pinMode(EN_1,OUTPUT);
+	digitalWrite(EN_1,HIGH);
+	pinMode(EN_2, OUTPUT);
+	digitalWrite(EN_2,LOW);
 	// Default to X-axis readout
-	pinMode(31,OUTPUT);
-	digitalWrite(31,LOW);
+	pinMode(X_Y,OUTPUT);
+	digitalWrite(X_Y,LOW);
 	// Default to OE on
-	pinMode(37,OUTPUT);
-	digitalWrite(37,LOW);
+	pinMode(OE,OUTPUT);
+	digitalWrite(OE,LOW);
 	// Initialize SEL pins
-	pinMode(36,OUTPUT);
-	pinMode(34,OUTPUT);
+	pinMode(SEL_1,OUTPUT);
+	pinMode(SEL_2,OUTPUT);
 	// RSTX high
-	pinMode(35,OUTPUT);
-	digitalWrite(35,HIGH);
+	pinMode(RST_X,OUTPUT);
+	digitalWrite(RST_X,HIGH);
 	// RSTY high
-	pinMode(30,OUTPUT);
-	digitalWrite(30,HIGH);
+	pinMode(RST_Y,OUTPUT);
+	digitalWrite(RST_Y,HIGH);
 	// Input Pins
-	pinMode(22, INPUT);
-  	pinMode(23, INPUT);
-  	pinMode(24, INPUT);
-  	pinMode(25, INPUT);
-  	pinMode(26, INPUT);
-  	pinMode(27, INPUT);
-  	pinMode(28, INPUT);
-  	pinMode(29, INPUT);
+	pinMode(D0, INPUT);
+  	pinMode(D1, INPUT);
+  	pinMode(D2, INPUT);
+  	pinMode(D3, INPUT);
+  	pinMode(D4, INPUT);
+  	pinMode(D5, INPUT);
+  	pinMode(D6, INPUT);
+  	pinMode(D7, INPUT);
   	// CLK
-  	pinMode(38, OUTPUT);
+  	pinMode(CLK, OUTPUT);
 }
 
 void Decoder::setCount4() {
-	digitalWrite(33,LOW);
-	digitalWrite(32,HIGH);
+	digitalWrite(EN_1,LOW);
+	digitalWrite(EN_2,HIGH);
 }
 
 void Decoder::setCount2() {
-	digitalWrite(33,HIGH);
-	digitalWrite(32,LOW);
+	digitalWrite(EN_1,HIGH);
+	digitalWrite(EN_2,LOW);
 }
 
 void Decoder::setCount1() {
-	digitalWrite(33,HIGH);
-	digitalWrite(32,HIGH);
+	digitalWrite(EN_1,HIGH);
+	digitalWrite(EN_2,HIGH);
 }
 
 int Decoder::readLSB(bool axis) {
-	digitalWrite(36, HIGH);
-	digitalWrite(34, LOW);
+	digitalWrite(SEL_1, HIGH);
+	digitalWrite(SEL_2, LOW);
 	if (axis == true) {
-		digitalWrite(31, HIGH);
+		digitalWrite(X_Y, HIGH);
 		_result_loy = PINA;
 		return _result_loy;
 	}
 	else if (axis == false) {
-		digitalWrite(31, LOW);
+		digitalWrite(X_Y, LOW);
 		_result_lox = PINA;
 		return _result_lox;
 	}
 }
 
 int Decoder::read3SB(bool axis) {
-	digitalWrite(36,LOW);
-	digitalWrite(34,LOW);
+	digitalWrite(SEL_1,LOW);
+	digitalWrite(SEL_2,LOW);
 	if (axis == true) {
-		digitalWrite(31, HIGH);
+		digitalWrite(X_Y, HIGH);
 		_result_3rdy = PINA;
 		return _result_3rdy;
 	}
 	else if (axis == false) {
-		digitalWrite(31, LOW);
+		digitalWrite(X_Y, LOW);
 		_result_3rdx = PINA;
 		return _result_3rdx;
 	}
