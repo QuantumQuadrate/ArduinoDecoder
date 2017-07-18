@@ -5,6 +5,26 @@
 #ifndef Decoder_h
 #define Decoder_h
 
+//pin defines
+#define D0 0x16 //arduino pin 22
+#define D1 0x17 //arduino pin 23
+#define D2 0x18 //arduino pin 24
+#define D3 0x19 //arduino pin 25
+#define D4 0x1A //arduino pin 26
+#define D5 0x1B //arduino pin 27
+#define D6 0x1C //arduino pin 28
+#define D7 0x1D //arduino pin 29
+
+#define RST_Y 0x1E //arduino pin 30
+#define X_Y 0x1F //arduino pin 31
+#define EN_2 0x20 //arduino pin 32
+#define EN_1 0x21 //arduino pin 33
+#define SEL_2 0x22 //arduino pin 34
+#define RST_X 0x23 //arduino pin 35
+#define SEL_1 0x24 //arduino pin 36
+#define OE 0x25 //arduino pin 37
+#define CLK 0x26 //arduino pin 38
+
 #include "Arduino.h"
 
 class Decoder 
