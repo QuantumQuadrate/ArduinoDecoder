@@ -53,6 +53,17 @@ void Decoder::start() {
   	pinMode(CLK, OUTPUT);
 }
 
+void Decoder::reset(){
+	_resultx = 0;
+	_resulty = 0;
+	_result_lox = 0;
+	_result_loy = 0;
+	_result_3rdx = 0;
+	_result_3rdy = 0;
+	_refpointx = 0;
+	_refpointy = 0;
+}
+
 void Decoder::setCount4() {
 	digitalWrite(EN_1,LOW);
 	digitalWrite(EN_2,HIGH);
