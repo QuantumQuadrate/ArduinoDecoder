@@ -32,7 +32,6 @@ class Decoder
 	public:
 		Decoder(); // Constructor: Instantiates class variables
 		void start(); // Performs setup on Arduino to interface with the decoder
-		void reset(); //Sets everything back to position 0
 		/*
 			These three functions set the count mode of the decoder appropriately.
 		*/
