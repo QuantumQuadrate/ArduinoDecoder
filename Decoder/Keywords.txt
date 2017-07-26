@@ -5,7 +5,6 @@ setCount1	KEYWORD2
 readLSB	KEYWORD2
 read3SB	KEYWORD2
 start KEYWORD2
-reset KEYWORD2
 setPoint	KEYWORD2
 getAbsPos	KEYWORD2
 getRelPos	KEYWORD2
