@@ -31,6 +31,7 @@
 #include <Decoder.h>
 #include <EEPROM.h>
 #include <UIPEthernet.h>
+#include <avr/wdt.h>
 
 EthernetServer server = EthernetServer(1000);
 EthernetClient client;
@@ -62,7 +63,7 @@ void setup() {
   IPAddress myIP(192,168,0,2);
   Ethernet.begin(mac,myIP);
   server.begin();
-  
+  watchdogSetup();
 }
 
 //main loop
@@ -96,12 +97,13 @@ void loop() {
     if(msg[0] == '4'){
       ResetEEPROM();  
    }
-
-   DecoderWrite();
-   EepromWrite();
   }
+  DecoderWrite();
+  EepromWrite();
+  wdt_reset();
 }
 
+//Sends "Start" back to client verifying the socket connection
 void Start(){
   client.println("Start\n");
 }
@@ -167,7 +169,7 @@ void EepromWrite(){
 }
 
 
-//Functions that writes sixteen bit integers to the eeprom
+//writes sixteen bit integers to the eeprom
 void EEPROMWrite16(int address, int value){
   //Decomposition from a int to bytes by using bitshift.
   //One = Most significant, Two = Least significant byte
@@ -189,14 +191,14 @@ int EEPROMRead16(int address){
   return ((two << 0) & 0xFF) + ((one << 8) & 0xFFFF);
 }
 
-//Function to check if the Arduino is storing old positions
+//check if the Arduino is storing old positions
 void EEPROMCheck(){
   if(EEPROM.read(1) == 255){
       EEPROM.write(1, 100);
   }
 }
 
-//Function to tell the arduino to forget previous positions
+//tells the arduino to forget previous positions
 //This writes to the ethernet client and returns the reset condition
 void ResetEEPROM(){
   EEPROM.write(1, 255);
@@ -207,4 +209,24 @@ void ResetEEPROM(){
   client.println(EEPROM.read(1));
 }
 
+//Sets up the watchdog timer to reset if it hangs for more than 2 seconds
+void watchdogSetup(void)
+{
+  cli();     // disable all interrupts 
+  wdt_reset();  // reset the WDT timer 
+/*
+  WDTCSR configuration:
+  WDIE = 1: Interrupt Enable 
+  WDE = 1 :Reset Enable
+  WDP3 = 0 :For 2s Time-out 
+  WDP2 = 1 :For 2s Time-out 
+  WDP1 = 1 :For 2s Time-out 
+  WDP0 = 1 :For 2s Time-out
+*/
 
+  // Enter Watchdog Configuration mode: 
+  WDTCSR |= (1<<WDCE) | (1<<WDE); 
+  // Set Watchdog settings:
+  WDTCSR = (1<<WDIE) | (1<<WDE) | (0<<WDP3) | (1<<WDP2) | (1<<WDP1) | (1<<WDP0); 
+  sei();
+}
