@@ -31,6 +31,8 @@
 
 Decoder decoder;
 
+#define MAGIC_BYTE 100
+
 //TODO: Clean up global variables, probably don't need this many
 int ResultX;
 int ResultY;
@@ -53,7 +55,11 @@ void setup() {
   
   //if the eeprom is already storing postions
   //this will store them  into the global variables
-  if(EEPROM.read(1) == 100){
+  int eeprom_val = EEPROM.read(1);
+  //Serial.print("EEPROM val: ");
+  //Serial.println(eeprom_val);
+  if(eeprom_val == MAGIC_BYTE){
+    //Serial.println("Using saved eeprom positions");
     offsetY = EEPROMRead16(2);
     offsetX = EEPROMRead16(4);
     ResultX = offsetX;
@@ -158,8 +164,8 @@ int EEPROMRead16(int address){
 
 //Function to check if the Arduino is storing old positions
 void EEPROMCheck(){
-  if(EEPROM.read(1) == 255){
-      EEPROM.write(1, 100);
+  if(EEPROM.read(1) != MAGIC_BYTE){
+      EEPROM.write(1, MAGIC_BYTE);
   }
 }
 
