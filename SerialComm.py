@@ -13,7 +13,7 @@ class ArduinoSerial(object):
 	def START(self):
 		try:
 			print self.ser.readline()
-			#TODO: Check for START in buffer
+			# TODO: Check for START in buffer
 			return 0
 
 		except self.serial.self.serialutil.SerialException:
@@ -58,6 +58,15 @@ class ArduinoSerial(object):
 			# get the self.serial number from the EEPROM of the arduino
 			self.ser.write(chr(3))
 			n = self.ser.readline()
+			return n
+		except serial.serialutil.SerialException:
+			print "There was a self.serial/usb error"
+
+	def RESET(self):
+		try:
+			# get the self.serial number from the EEPROM of the arduino
+			self.ser.write(chr(4))
+			n = int(self.ser.readline())
 			return n
 		except serial.serialutil.SerialException:
 			print "There was a self.serial/usb error"
