@@ -41,3 +41,9 @@ Decoder/Keywords.txt - Keywords file so library classes and functions look nice 
 DecoderTest.ino - Arduino code that runs with the library in the Decoder folder.
 Instructions on how to connect the decoder IC to the Arduino are in the .ino file.
 Current Work: Will optimize speed by using a register command rather than DigitalWrite for the clock signal.
+
+## Encoder Hardware
+
+Encoder (HEDR-55L2-BY07) : Datasheet can be found [here](http://www.mouser.com/ds/2/678/V02-3823EN_DS_HEDR-5xxx_2014-10-300-909317.pdf)
+
+Decoder (HCTL-2032-SC) :  Datasheet can be found [here](https://media.digikey.com/pdf/Data%20Sheets/Avago%20PDFs/HCTL-2032,2022.pdf)
