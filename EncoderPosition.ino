@@ -50,7 +50,7 @@ unsigned long timerY = millis();
 void setup() {
   Serial.begin(115200);
   decoder.start();
-  
+
   //if the eeprom is already storing postions
   //this will store them  into the global variables
   if(EEPROM.read(1) == 100){
@@ -75,7 +75,7 @@ void loop() {
           StatusReply();
     }
     if(int(inByte) == 4){
-      ResetEEPROM();  
+      ResetEEPROM();
     }
   }
   DecoderWrite();
@@ -87,11 +87,11 @@ void DecoderWrite(){
   Result_lo = decoder.readLSB(1);
   Result_3rd = decoder.read3SB(1);
   ResultY = Result_lo + (256*Result_3rd) + offsetY;
-  
+
   Result_lo = decoder.readLSB(0);
   Result_3rd = decoder.read3SB(0);
   ResultX = Result_lo + (256*Result_3rd) + offsetX;
-  
+
 }
 
 //writes a position value to the eeprom
@@ -104,7 +104,7 @@ void EepromWrite(){
     }
     timerY = millis();
   }
-  if((millis()-timerX) >= 10000UL){  
+  if((millis()-timerX) >= 10000UL){
     if(Result_oldX != ResultX){
       EEPROMWrite16(4, ResultX);
       Result_oldX = ResultX;
@@ -151,7 +151,7 @@ int EEPROMRead16(int address){
   //Read the 2 bytes from the eeprom memory.
   int two = EEPROM.read(address);
   int one = EEPROM.read(address + 1);
-  
+
   //Return the recomposed int by using bitshift.
   return ((two << 0) & 0xFF) + ((one << 8) & 0xFFFF);
 }
@@ -170,4 +170,6 @@ void ResetEEPROM(){
   EEPROMWrite16(2, 0);
   EEPROMWrite16(4, 0);
   Serial.println(EEPROM.read(1));
+  offsetX=0;
+  offsetY=0;
 }

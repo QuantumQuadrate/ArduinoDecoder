@@ -7,7 +7,7 @@
 
 #include "Arduino.h"
 
-class Decoder 
+class Decoder
 {
 	public:
 		Decoder(); // Constructor: Instantiates class variables
@@ -36,7 +36,7 @@ class Decoder
 		void setPoint(int point, bool axis);
 		// getAbsPos: Returns currently stored absolute position of the encoder
 		int getAbsPos(bool axis);
-		/* 
+		/*
 			getRelPos: Subtracts reference point from currently stored absolute
 			position, then returns result as an int. With no point arg, uses currently
 			stored reference point.
@@ -44,14 +44,14 @@ class Decoder
 		int getRelPos(bool axis);
 		int getRelPos(bool axis, int point);
 	private:
-		int _resultx;
-		int _resulty;
-		int _result_lox;
-		int _result_loy;
-		int _result_3rdx;
-		int _result_3rdy;
-		int _refpointx;
-		int _refpointy;
+		int16_t _resultx;
+		int16_t _resulty;
+		int8_t _result_lox;
+		int8_t _result_loy;
+		int8_t _result_3rdx;
+		int8_t _result_3rdy;
+		int16_t _refpointx;
+		int16_t _refpointy;
 };
 
 #endif

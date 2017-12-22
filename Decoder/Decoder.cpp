@@ -16,7 +16,7 @@ Decoder::Decoder() {
 	_result_3rdy = 0;
 	_refpointx = 0;
 	_refpointy = 0;
-	
+
 }
 
 void Decoder::start() {
@@ -101,15 +101,15 @@ int Decoder::read3SB(bool axis) {
 
 void Decoder::setPoint(bool axis) {
 	if (axis == true){
-		_resulty = _result_loy + 256*_result_3rdy;
+		_resulty = (int16_t)_result_loy + 256*(int16_t)_result_3rdy;
 		setPoint(_resulty, axis);
 	}
 
 	else if (axis == false) {
-		_resultx = _result_lox + 256*_result_3rdx;
+		_resultx = (int16_t)_result_lox + 256*(int16_t)_result_3rdx;
 		setPoint(_resultx, axis);
 	}
-	
+
 
 }
 
@@ -124,12 +124,12 @@ void Decoder::setPoint(int point, bool axis) {
 
 int Decoder::getAbsPos(bool axis) {
 	if (axis == true) {
-		_resulty = _result_loy + 256*_result_3rdy;
+		_resulty = (int16_t)_result_loy + 256*(int16_t)_result_3rdy;
 		return _resulty;
 	}
 
 	else if (axis == false) {
-		_resultx = _result_lox + 256*_result_3rdx;
+		_resultx = (int16_t)_result_lox + 256*(int16_t)_result_3rdx;
 		return _resultx;
 	}
 }
@@ -146,11 +146,11 @@ int Decoder::getRelPos(bool axis) {
 
 int Decoder::getRelPos(bool axis, int point) {
 	if (axis == true) {
-		_resulty = _result_loy + 256*_result_3rdy - point;
+		_resulty = (int16_t)_result_loy + 256*(int16_t)_result_3rdy - point;
 		return _resulty;
 	}
 	else if (axis == false) {
-		_resultx = _result_lox + 256*_result_3rdx - point;
+		_resultx = (int16_t)_result_lox + 256*(int16_t)_result_3rdx - point;
 		return _resultx;
 	}
 }
