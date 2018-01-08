@@ -1,40 +1,25 @@
-// Arduino Serial Communication -- Syd Lybert, Andrew Micklich -- June 2017
-// ------------------------------------------
-// SETUP:
-// Connect Arduino MEGA digital pins 22-29 to D0-D7 on the HTCL
-// Connect digital pin 31 to X/Y
-// Connect digital pins 33 and 32 to EN1, EN2 respectively
-// Connect digital pin 34 to SEL2
-// Connect digital pin 36 to SEL1
-// Connect digital pin 35 to RSTX
-// Connect digital pin 30 to RSTY
-// Connect digital pin 36 to OE
-// Connect digital pin 38 to CLK
-// Connect 5V Arduino pin to 5V input on optical encoder and V_DD on HTCL
-// Connect GND Arduino pin to GND on optical encoder and V_SS on HTCL
-// Connect Channel A on encoder to CHA_X on HTCL
-// Connect Channel B on encoder to CHB_X on HTCL
-// NOTE: Index Channel not yet supported in code
-// TEST TEXT
-// --------------------------------------------
-// Known Bugs:
-// None
-// --------------------------------------------
-// Known Limitations:
-// If encoder is turned too rapidly, will not record (Hardware limits? Clock limits?)
-// Only 16-bit count currently, eventually can support 32-bit if necessary
-// Other Useful Info:
-// Toggling between the X and Y channels is explained in the Decoder.h file as follows:
-// ReadLSB and READ3SB take boolean arguements, 0 for x axis, and 1 for y axis
+// Arduino-based rotary decoder
+// Supporting devices : Arduino Mega
+// Will be tested on Teensy as they are capable of detecting faster
+// Previous contributors -- Syd Lybert, Andrew Micklich -- June 2017
+// Also based on rotary encoder codes found from https://playground.arduino.cc/Main/RotaryEncoders by rafbuff
 #include <Decoder.h>
 #include <EEPROM.h>
 
 Decoder decoder;
 
+// Encoder signals should be connected to pins capable of interrupts.
+// Arduino Mega: 	2, 3, 18, 19, 20, 21
+// Teensy 3.5 : All digital pins (double check)
 enum PinAssignments {
-  encoderPinA = 2,   // right
-  encoderPinB = 3,   // left
-  clearButton = 8    // another two pins
+  // Channel 1
+  encoder1_PinA = 2,   // right
+  encoder1_PinB = 3,   // left
+  // Channel 1
+  encoder2_PinA = 18,   // right
+  encoder2_PinB = 19,   // left
+
+//  clearButton = 8    // another two pins
 };
 
 //TODO: Clean up global variables, probably don't need this many
@@ -42,8 +27,6 @@ int ResultX;
 int ResultY;
 int Result_oldY;
 int Result_oldX;
-int Result_lo;
-int Result_3rd;
 int offsetX = 0;
 int offsetY= 0;
 char inByte;
