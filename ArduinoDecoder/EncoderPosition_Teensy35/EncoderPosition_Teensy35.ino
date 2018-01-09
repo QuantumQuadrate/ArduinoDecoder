@@ -82,19 +82,20 @@ void setup() {
 
 void loop() {
   //Need to read the serial port until we get values dictating what happens next
-  while(Serial.available()>0){
-    inByte = Serial.read();
-    Serial.println(encoder1_Result);
-    if(int(inByte) == 2){
-          ReadReply();
-    }
-    if(int(inByte) == 3){
-          StatusReply();
-    }
-    if(int(inByte) == 4){
-      ResetEEPROM();
-    }
-  }
+   while(Serial.available()>0){
+     inByte = Serial.read();
+     if(int(inByte) == 2){
+           ReadReply();
+     }
+     if(int(inByte) == 3){
+           StatusReply();
+     }
+     if(int(inByte) == 4){
+       ResetEEPROM();
+     }
+     delay(100);
+   }
+ 
   encoder1_rotating = true;  // reset the debouncer
   encoder2_rotating = true;  // reset the debouncer
 
@@ -150,9 +151,11 @@ void ReadReply(){
     }
   if(int(motorAxis) == 1){
     Serial.println(encoder2_Result, HEX);
+    //Serial.println(encoder2_Result);
   }
   if(int(motorAxis) == 0){
     Serial.println(encoder1_Result, HEX);
+    //Serial.println(encoder1_Result);
   }
 
 }
