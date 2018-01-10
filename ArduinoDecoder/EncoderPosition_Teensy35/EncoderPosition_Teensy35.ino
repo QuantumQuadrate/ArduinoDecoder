@@ -1,13 +1,14 @@
-// Arduino-based rotary decoder
-// Supporting devices : Arduino Mega
-// Will be tested on Teensy as they are capable of detecting faster
+// Teensy quadrature rotary decoder
+// Teensy version written by Minho Kwon Jan 2018
 // Previous contributors -- Syd Lybert, Andrew Micklich -- June 2017
-// Also based on rotary encoder codes found from https://playground.arduino.cc/Main/RotaryEncoders by rafbuff
+
 #include <EEPROM.h>
+#include <Encoder.h> // Using encoder library comes with Teensy
 
 // Encoder signals should be connected to pins capable of interrupts.
 // Arduino Mega:   2, 3, 18, 19, 20, 21
-// Teensy 3.5 : All digital pins (double check)
+// Teensy 3.5 : All digital pins. Note that interrupt # may be different from the digital pin #
+// Safe way to do is to
 enum PinAssignments {
   // Channel 1
   encoder1_PinA = 2,   // right
@@ -15,68 +16,63 @@ enum PinAssignments {
   // Channel 2
   encoder2_PinA = 18,   // right
   encoder2_PinB = 19,   // left
+  // Channel 3
+  encoder3_PinA = 20,   // right
+  encoder3_PinB = 21,   // left
+  // Channel 4
+  encoder4_PinA = 9,   // right
+  encoder4_PinB = 10,   // left
 };
 
-
-int encoder1_Result; // Result is pos plus offset.
-int encoder2_Result;
-int encoder1_Result_old;
-int encoder2_Result_old;
-int encoder1_offset = 0;
+int encoder1_Result=0;
+int encoder2_Result=0;
+int encoder3_Result=0;
+int encoder4_Result=0; // Result is position reading plus given offset.
+int encoder1_Result_old=0;
+int encoder2_Result_old=0;
+int encoder3_Result_old=0;
+int encoder4_Result_old=0;
+int encoder1_offset= 0;
 int encoder2_offset= 0;
+int encoder3_offset= 0;
+int encoder4_offset= 0;
+int encoder1_Pos, encoder2_Pos, encoder3_Pos, encoder4_Pos;
 char inByte;
 char motorAxis;
+unsigned long timer1 = millis();
+unsigned long timer2 = millis();
+unsigned long timer3 = millis();
+unsigned long timer4 = millis();
 
-unsigned long timerX = millis();
-unsigned long timerY = millis();
-
-volatile unsigned int encoder1_Pos = 0;  // a counter for the dial
-unsigned int encoder1_lastReportedPos = 1;   // change management
-static boolean encoder1_rotating = false;    // debounce management
-
-volatile unsigned int encoder2_Pos = 0;  // a counter for the dial
-unsigned int encoder2_lastReportedPos = 1;   // change management
-static boolean encoder2_rotating = false;    // debounce management
-
-
-// interrupt service routine vars
-boolean encoder1_A_set = false;
-boolean encoder1_B_set = false;
-boolean encoder2_A_set = false;
-boolean encoder2_B_set = false;
+Encoder encoder1(encoder1_PinA, encoder1_PinB);
+Encoder encoder2(encoder2_PinA, encoder2_PinB);
+Encoder encoder3(encoder3_PinA, encoder3_PinB);
+Encoder encoder4(encoder4_PinA, encoder4_PinB);
 
 
 //setup code
 void setup() {
   Serial.begin(115200);
-  pinMode(encoder1_PinA, INPUT);
-  pinMode(encoder1_PinB, INPUT);
-  pinMode(encoder2_PinA, INPUT);
-  pinMode(encoder2_PinB, INPUT);
-  // turn on pullup resistors
-  digitalWrite(encoder1_PinA, HIGH);
-  digitalWrite(encoder1_PinB, HIGH);
-  digitalWrite(encoder2_PinA, HIGH);
-  digitalWrite(encoder2_PinB, HIGH);
-
-  // encoder pin on interrupt 0 (pin 2 for Mega)
-  attachInterrupt(digitalPinToInterrupt(2), doEncoder1_A, CHANGE);
-  // encoder pin on interrupt 1 (pin 3 for Mega)
-  attachInterrupt(digitalPinToInterrupt(3), doEncoder1_B, CHANGE);
-  // encoder pin on interrupt 5 (pin 18 for Mega)
-  attachInterrupt(5, doEncoder2_A, CHANGE);
-  // encoder pin on interrupt 4 (pin 19 for Mega)
-  attachInterrupt(4, doEncoder2_B, CHANGE);
   //if the eeprom is already storing postions
-  //this will store them  into the global variables
+  //this will store them into the global variables
   if(EEPROM.read(1) == 100){
     encoder1_offset = EEPROMRead16(4);
     encoder2_offset = EEPROMRead16(2);
     encoder1_Result = encoder1_offset;
     encoder2_Result = encoder2_offset;
+    encoder3_Result = encoder3_offset;
+    encoder4_Result = encoder4_offset;
     encoder1_Result_old = encoder1_Result;
     encoder2_Result_old = encoder2_Result;
+    encoder3_Result_old = encoder3_Result;
+    encoder4_Result_old = encoder4_Result;
   }
+  // Initializes encoder position to zero
+  encoder1.write(encoder1_Result)
+  encoder2.write(encoder2_Result)
+  encoder3.write(encoder3_Result)
+  encoder4.write(encoder4_Result)
+
   Serial.println("Start");
 }
 
@@ -93,48 +89,52 @@ void loop() {
      if(int(inByte) == 4){
        ResetEEPROM();
      }
-     delay(100);
    }
- 
-  encoder1_rotating = true;  // reset the debouncer
-  encoder2_rotating = true;  // reset the debouncer
-
-  DecoderWrite();
+  DecoderRead();
   EepromWrite();
 }
 
 //Saves the current position of the encoders to global variables
-void DecoderWrite(){
-  if (encoder1_lastReportedPos != encoder1_Pos) {
-    encoder1_lastReportedPos = encoder1_Pos;
-    encoder1_Result_old=encoder1_lastReportedPos+encoder1_offset;
+void DecoderRead(){
+  encoder1_Pos=encoder1.read()+encoder1_offset;
+  if (encoder1_Result_old != encoder1_Pos) {
+    encoder1_Result_old = encoder1_Pos;
     encoder1_Result=encoder1_Result_old;
   }
-  if (encoder2_lastReportedPos != encoder2_Pos) {
-    encoder2_lastReportedPos = encoder2_Pos;
-    encoder2_Result_old=encoder2_lastReportedPos+encoder2_offset;
+  encoder2_Pos=encoder2.read()+encoder2_offset;
+  if (encoder2_Result_old != encoder2_Pos) {
+    encoder2_Result_old = encoder2_Pos;
     encoder2_Result=encoder2_Result_old;
   }
-
+  encoder3_Pos=encoder3.read()+encoder3_offset;
+  if (encoder3_Result_old != encoder3_Pos) {
+    encoder3_Result_old = encoder3_Pos;
+    encoder3_Result=encoder3_Result_old;
+  }
+  encoder4_Pos=encoder4.read()+encoder4_offset;
+  if (encoder4_Result_old != encoder4_Pos) {
+    encoder4_Result_old = encoder4_Pos;
+    encoder4_Result=encoder4_Result_old;
+  }
 }
 
 //writes a position value to the eeprom
 void EepromWrite(){
-  if((millis()-timerY) >= 10000UL){
+  if((millis()-timer2) >= 10000UL){
     if(encoder2_Result_old != encoder2_Result){
       EEPROMWrite16(2, encoder2_Result);
       encoder2_Result_old = encoder2_Result;
       EEPROMCheck();
     }
-    timerY = millis();
+    timer2 = millis();
   }
-  if((millis()-timerX) >= 10000UL){
+  if((millis()-timer1) >= 10000UL){
     if(encoder1_Result_old != encoder1_Result){
       EEPROMWrite16(4, encoder1_Result);
       encoder1_Result_old = encoder1_Result;
       EEPROMCheck();
     }
-    timerX = millis();
+    timer1 = millis();
   }
 }
 
@@ -149,13 +149,17 @@ void ReadReply(){
     while(motorAxis == -1){
       motorAxis = Serial.read();
     }
-  if(int(motorAxis) == 1){
-    Serial.println(encoder2_Result, HEX);
-    //Serial.println(encoder2_Result);
-  }
   if(int(motorAxis) == 0){
     Serial.println(encoder1_Result, HEX);
-    //Serial.println(encoder1_Result);
+  }
+  if(int(motorAxis) == 1){
+    Serial.println(encoder2_Result, HEX);
+  }
+  if(int(motorAxis) == 2){
+    Serial.println(encoder3_Result, HEX);
+  }
+  if(int(motorAxis) == 3){
+    Serial.println(encoder4_Result, HEX);
   }
 
 }
@@ -198,67 +202,5 @@ void ResetEEPROM(){
   Serial.println(EEPROM.read(1));
   encoder1_offset=0;
   encoder2_offset=0;
-}
-
-void doEncoder1_A() {
-  // debounce
-  if (encoder1_rotating ) delay (1);  // wait a little until the bouncing is done
-
-  // Test transition, did things really change?
-  if ( digitalRead(encoder1_PinA) != encoder1_A_set ) { // debounce once more
-    encoder1_A_set = !encoder1_A_set;
-
-    // adjust counter + if A leads B
-    if ( encoder1_A_set && !encoder1_B_set )
-      encoder1_Pos += 1;
-
-    encoder1_rotating = false;  // no more debouncing until loop() hits again
-  }
-
-}
-
-// Interrupt on B changing state, same as A above
-void doEncoder1_B() {
-  if ( encoder1_rotating ) delay (1);
-  if ( digitalRead(encoder1_PinB) != encoder1_B_set ) {
-    encoder1_B_set = !encoder1_B_set;
-    //  adjust counter - 1 if B leads A
-    if ( encoder1_B_set && !encoder1_A_set )
-      encoder1_Pos -= 1;
-
-    encoder1_rotating = false;
-  }
-
-}
-
-void doEncoder2_A() {
-  // debounce
-  if (encoder2_rotating ) delay (1);  // wait a little until the bouncing is done
-
-  // Test transition, did things really change?
-  if ( digitalRead(encoder2_PinA) != encoder2_A_set ) { // debounce once more
-    encoder2_A_set = !encoder2_A_set;
-
-    // adjust counter + if A leads B
-    if ( encoder2_A_set && !encoder2_B_set )
-      encoder2_Pos += 1;
-
-    encoder2_rotating = false;  // no more debouncing until loop() hits again
-  }
-
-}
-
-// Interrupt on B changing state, same as A above
-void doEncoder2_B() {
-  if ( encoder2_rotating ) delay (1);
-  if ( digitalRead(encoder2_PinB) != encoder2_B_set ) {
-    encoder2_B_set = !encoder2_B_set;
-    //  adjust counter - 1 if B leads A
-    if ( encoder2_B_set && !encoder2_A_set )
-      encoder2_Pos -= 1;
-
-    encoder2_rotating = false;
-  }
-
 }
 
