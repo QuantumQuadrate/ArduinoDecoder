@@ -14,29 +14,34 @@ enum PinAssignments {
   encoder1_PinA = 2,   // right
   encoder1_PinB = 3,   // left
   // Channel 2
-  encoder2_PinA = 18,   // right
-  encoder2_PinB = 19,   // left
+  encoder2_PinA = 25,   // right
+  encoder2_PinB = 26,   // left
   // Channel 3
-  encoder3_PinA = 20,   // right
-  encoder3_PinB = 21,   // left
+  encoder3_PinA = 22,   // right
+  encoder3_PinB = 23,   // left
   // Channel 4
-  encoder4_PinA = 9,   // right
-  encoder4_PinB = 10,   // left
+  encoder4_PinA = 38,   // right
+  encoder4_PinB = 39,   // left
 };
 
-int encoder1_Result=0;
-int encoder2_Result=0;
-int encoder3_Result=0;
-int encoder4_Result=0; // Result is position reading plus given offset.
-int encoder1_Result_old=0;
-int encoder2_Result_old=0;
-int encoder3_Result_old=0;
-int encoder4_Result_old=0;
-int encoder1_offset= 0;
-int encoder2_offset= 0;
-int encoder3_offset= 0;
-int encoder4_offset= 0;
-int encoder1_Pos, encoder2_Pos, encoder3_Pos, encoder4_Pos;
+int32_t encoder1_Result=0;
+int32_t encoder2_Result=0;
+int32_t encoder3_Result=0;
+int32_t encoder4_Result=0; // Result is position reading plus given offset.
+int32_t encoder1_Result_old=0;
+int32_t encoder2_Result_old=0;
+int32_t encoder3_Result_old=0;
+int32_t encoder4_Result_old=0;
+int32_t encoder1_offset= 0;
+int32_t encoder2_offset= 0;
+int32_t encoder3_offset= 0;
+int32_t encoder4_offset= 0;
+int32_t encoder1_Pos, encoder2_Pos, encoder3_Pos, encoder4_Pos;
+int eeprom_address1= 2;
+int eeprom_address2= 6;
+int eeprom_address3= 10;
+int eeprom_address4= 14;
+
 char inByte;
 char motorAxis;
 unsigned long timer1 = millis();
@@ -56,8 +61,10 @@ void setup() {
   //if the eeprom is already storing postions
   //this will store them into the global variables
   if(EEPROM.read(1) == 100){
-    encoder1_offset = EEPROMRead16(4);
-    encoder2_offset = EEPROMRead16(2);
+    encoder1_offset = EEPROMRead32(eeprom_address1);
+    encoder2_offset = EEPROMRead32(eeprom_address2);
+    encoder3_offset = EEPROMRead32(eeprom_address3);
+    encoder4_offset = EEPROMRead32(eeprom_address4);
     encoder1_Result = encoder1_offset;
     encoder2_Result = encoder2_offset;
     encoder3_Result = encoder3_offset;
@@ -67,11 +74,11 @@ void setup() {
     encoder3_Result_old = encoder3_Result;
     encoder4_Result_old = encoder4_Result;
   }
-  // Initializes encoder position to zero
-  encoder1.write(encoder1_Result)
-  encoder2.write(encoder2_Result)
-  encoder3.write(encoder3_Result)
-  encoder4.write(encoder4_Result)
+  // Initializes encoder position to zero or to the stored values.
+  encoder1.write(encoder1_Result);
+  encoder2.write(encoder2_Result);
+  encoder3.write(encoder3_Result);
+  encoder4.write(encoder4_Result);
 
   Serial.println("Start");
 }
@@ -96,22 +103,22 @@ void loop() {
 
 //Saves the current position of the encoders to global variables
 void DecoderRead(){
-  encoder1_Pos=encoder1.read()+encoder1_offset;
+  encoder1_Pos=encoder1.read();
   if (encoder1_Result_old != encoder1_Pos) {
     encoder1_Result_old = encoder1_Pos;
     encoder1_Result=encoder1_Result_old;
   }
-  encoder2_Pos=encoder2.read()+encoder2_offset;
+  encoder2_Pos=encoder2.read();
   if (encoder2_Result_old != encoder2_Pos) {
     encoder2_Result_old = encoder2_Pos;
     encoder2_Result=encoder2_Result_old;
   }
-  encoder3_Pos=encoder3.read()+encoder3_offset;
+  encoder3_Pos=encoder3.read();
   if (encoder3_Result_old != encoder3_Pos) {
     encoder3_Result_old = encoder3_Pos;
     encoder3_Result=encoder3_Result_old;
   }
-  encoder4_Pos=encoder4.read()+encoder4_offset;
+  encoder4_Pos=encoder4.read();
   if (encoder4_Result_old != encoder4_Pos) {
     encoder4_Result_old = encoder4_Pos;
     encoder4_Result=encoder4_Result_old;
@@ -120,9 +127,25 @@ void DecoderRead(){
 
 //writes a position value to the eeprom
 void EepromWrite(){
+  if((millis()-timer4) >= 10000UL){
+    if(encoder4_Result_old != encoder4_Result){
+      EEPROMWrite32(eeprom_address4, encoder4_Result);
+      encoder4_Result_old = encoder4_Result;
+      EEPROMCheck();
+    }
+    timer4 = millis();
+  }
+    if((millis()-timer3) >= 10000UL){
+      if(encoder3_Result_old != encoder3_Result){
+        EEPROMWrite32(eeprom_address3, encoder3_Result);
+        encoder3_Result_old = encoder3_Result;
+        EEPROMCheck();
+      }
+      timer2 = millis();
+    }
   if((millis()-timer2) >= 10000UL){
     if(encoder2_Result_old != encoder2_Result){
-      EEPROMWrite16(2, encoder2_Result);
+      EEPROMWrite32(eeprom_address2, encoder2_Result);
       encoder2_Result_old = encoder2_Result;
       EEPROMCheck();
     }
@@ -130,7 +153,7 @@ void EepromWrite(){
   }
   if((millis()-timer1) >= 10000UL){
     if(encoder1_Result_old != encoder1_Result){
-      EEPROMWrite16(4, encoder1_Result);
+      EEPROMWrite32(eeprom_address1, encoder1_Result);
       encoder1_Result_old = encoder1_Result;
       EEPROMCheck();
     }
@@ -165,25 +188,30 @@ void ReadReply(){
 }
 
 //Functions that writes sixteen bit integers to the eeprom
-void EEPROMWrite16(int address, int value){
-  //Decomposition from a int to bytes by using bitshift.
-  //One = Most significant, Two = Least significant byte
-  byte two = (value & 0xFF);
-  byte one = ((value >> 8) & 0xFF);
-
-  //Write the 2 bytes into the eeprom memory.
-  EEPROM.write(address, two);
-  EEPROM.write(address + 1, one);
+void EEPROMWrite32(int address, int32_t value){
+  //Decomposition from a 32bit signed int to bytes by using bitshift.
+  //One = Most significant, Two = 2nd significant byte
+  //Three = 3rd significant byte, Four=Least significant byte
+  byte four = (value & 0xFF);
+  byte three = ((value >> 8) & 0xFF);
+  byte two = ((value >> 16) & 0xFF);
+  byte one = ((value >> 24) & 0xFF);
+  //Write the 4 bytes into the eeprom memory.
+  EEPROM.write(address, four);
+  EEPROM.write(address + 1, three);
+  EEPROM.write(address + 2, two);
+  EEPROM.write(address + 3, one);
 }
 
-//Reads in 16 bit integers from the eeprom
-int EEPROMRead16(int address){
+//Reads in 32 bit integers from the eeprom
+int32_t EEPROMRead32(int address){
   //Read the 2 bytes from the eeprom memory.
-  int two = EEPROM.read(address);
-  int one = EEPROM.read(address + 1);
-
+  int32_t four = EEPROM.read(address);
+  int32_t three = EEPROM.read(address + 1);
+  int32_t two = EEPROM.read(address + 2);
+  int32_t one = EEPROM.read(address + 3);
   //Return the recomposed int by using bitshift.
-  return ((two << 0) & 0xFF) + ((one << 8) & 0xFFFF);
+  return ((four << 0) & 0xFF) + ((three << 8) & 0xFFFF) + ((two << 16) & 0xFFFFFF) + ((one << 24) & 0xFFFFFFFF);
 }
 
 //Function to check if the Arduino is storing old positions
@@ -197,10 +225,14 @@ void EEPROMCheck(){
 //This writes to serial and returns the reset condition
 void ResetEEPROM(){
   EEPROM.write(1, 255);
-  EEPROMWrite16(2, 0);
-  EEPROMWrite16(4, 0);
+  EEPROMWrite32(eeprom_address1, 0);
+  EEPROMWrite32(eeprom_address2, 0);
+  EEPROMWrite32(eeprom_address3, 0);
+  EEPROMWrite32(eeprom_address4, 0);
   Serial.println(EEPROM.read(1));
   encoder1_offset=0;
   encoder2_offset=0;
+  encoder3_offset=0;
+  encoder4_offset=0;
 }
 
