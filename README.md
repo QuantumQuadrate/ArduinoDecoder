@@ -2,7 +2,11 @@
 
 Arduino-based quadrature decoder for use with picomotors
 
-Written by: Sydney Lybert and Andrew Micklich
+Authors : Sydney Lybert, Andrew Micklich and Minho Kwon
+
+Thanks to Sydney Lybert and Andrew Micklich for their early contribution. 
+
+Latest stable version is made for Teensy 3.5, where build-in counters provide more accessible way to decode quadruture signal.
 
 ## Dependencies
 
